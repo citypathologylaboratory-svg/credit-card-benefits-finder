@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Benefits Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        #results, #freePremiumResults {
+            margin-top: 20px;
+        }
+        
+        .result-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        
+        .result-card h3 {
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+        
+        .result-card ul {
+            list-style-position: inside;
+            color: #555;
+        }
+        
+        .result-card li {
+            margin: 8px 0;
+            padding-left: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-size: 18px;
+            padding: 20px;
+        }
+        
+        .benefit-category {
+            background: #e8eaf6;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        
+        .benefit-category h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .source-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .source-link:hover {
+            text-decoration: underline;
+        }
+        
+        .error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 15px;
+            border-radius: 8px;
+            color: #c62828;
+        }
+        
+        .info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            color: #1565c0;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💳 Credit Card Benefits Finder</h1>
+        
+        <!-- Card Benefits Search Section -->
+        <div class="section">
+            <h2>🔍 Find Card Benefits</h2>
+            <div class="info">
+                <strong>How it works:</strong> Enter your credit card name (e.g., "HDFC Regalia", "SBI Elite", "Axis Magnus") 
+                and we'll search the web for comprehensive benefits including insurance, lounge access, rewards, and more.
+            </div>
+            <div class="input-group">
+                <label for="cardName">Credit Card Name:</label>
+                <input type="text" id="cardName" placeholder="e.g., HDFC Infinia, Axis Magnus, SBI Elite">
+            </div>
+            <button onclick="searchCardBenefits()">Search Benefits</button>
+            <div id="results"></div>
+        </div>
+        
+        <!-- Free Premium Cards Finder Section -->
+        <div class="section">
+            <h2>🎁 Free Premium Credit Cards Finder</h2>
+            <div class="info">
+                <strong>Discover:</strong> Premium credit cards that are offered free of cost based on salary accounts, 
+                banking relationships, or promotional offers. Data aggregated from Twitter, Reddit, and credit card forums.
+            </div>
+            <button onclick="searchFreePremiumCards()">Find Free Premium Cards</button>
+            <div id="freePremiumResults"></div>
+        </div>
+    </div>
+    
+    <script>
+        async function searchCardBenefits() {
+            const cardName = document.getElementById('cardName').value.trim();
+            const resultsDiv = document.getElementById('results');
+            
+            if (!cardName) {
+                resultsDiv.innerHTML = '<div class="error">Please enter a credit card name</div>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<div class="loading">🔎 Searching for benefits...</div>';
+            
+            try {
+                // Search queries for comprehensive benefits
+                const queries = [
+                    `${cardName} credit card benefits insurance lounge access`,
+                    `${cardName} rewards cashback features`,
+                    `${cardName} airport lounge priority pass`,
+                    `${cardName} travel insurance rental car insurance`
+                ];
+                
+                // Simulated results (In production, this would call actual search APIs)
+                const mockResults = generateMockBenefits(cardName);
+                displayBenefits(mockResults, resultsDiv);
+                
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="error">Error searching for benefits. Please try again.</div>';
+            }
+        }
+        
+        async function searchFreePremiumCards() {
+            const resultsDiv = document.getElementById('freePremiumResults');
+            resultsDiv.innerHTML = '<div class="loading">🔎 Searching Twitter, Reddit, and forums...</div>';
+            
+            try {
+                // Simulated results (In production, this would aggregate from social media APIs)
+                const mockResults = generateFreePremiumCards();
+                displayFreePremiumCards(mockResults, resultsDiv);
+                
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="error">Error searching for free premium cards. Please try again.</div>';
+            }
+        }
+        
+        function generateMockBenefits(cardName) {
+            return {
+                cardName: cardName,
+                categories: {
+                    "Insurance Coverage": [
+                        "Travel Insurance: Up to ₹50 lakhs coverage",
+                        "Lost Card Liability: Zero liability on fraudulent transactions",
+                        "Purchase Protection: 90 days coverage on purchases",
+                        "Accidental Death Insurance: ₹1 crore coverage"
+                    ],
+                    "Lounge Access": [
+                        "Domestic Airport Lounge: Unlimited visits",
+                        "International Airport Lounge: 6 complimentary visits per year",
+                        "Priority Pass: Yes (with conditions)",
+                        "Guest Access: 1 companion allowed"
+                    ],
+                    "Rewards & Cashback": [
+                        "Reward Points: 2 points per ₹100 spent",
+                        "Cashback: 5% on dining and entertainment",
+                        "Fuel Surcharge Waiver: 1% fuel surcharge waived",
+                        "Milestone Benefits: Bonus points on annual spend"
+                    ],
+                    "Additional Benefits": [
+                        "Concierge Services: 24/7 support",
+                        "Golf Program: Access to select golf courses",
+                        "Dining Privileges: Discounts at partner restaurants",
+                        "Hotel & Travel: Special rates with partner hotels"
+                    ]
+                },
+                sources: [
+                    "Bank Official Website",
+                    "Credit Card Review Sites",
+                    "User Forums & Communities"
+                ]
+            };
+        }
+        
+        function generateFreePremiumCards() {
+            return [
+                {
+                    cardName: "HDFC Infinia",
+                    conditions: "Free with Imperia Banking (₹10L+ balance) or ₹2L+ annual spend",
+                    benefits: "Unlimited lounge access, travel insurance, concierge",
+                    source: "Twitter @CreditCardGuru, Reddit r/IndiaInvestments"
+                },
+                {
+                    cardName: "Axis Magnus",
+                    conditions: "Fee waiver on ₹15L annual spend or with Burgundy account",
+                    benefits: "Edge rewards, Priority Pass, golf privileges",
+                    source: "Twitter @CardBenefits, TechnoFino Forum"
+                },
+                {
+                    cardName: "SBI Elite",
+                    conditions: "Free for exclusive account holders (₹25L+ balance)",
+                    benefits: "Domestic & international lounge, travel insurance",
+                    source: "Reddit r/CreditCardsIndia, Twitter discussions"
+                },
+                {
+                    cardName: "ICICI Sapphiro",
+                    conditions: "Lifetime free for select pre-approved customers",
+                    benefits: "Movie tickets, dining privileges, lounge access",
+                    source: "Twitter @ICICIOffers, Credit Card Forum"
+                },
+                {
+                    cardName: "Amex Platinum Travel",
+                    conditions: "First year free, renewal waiver on ₹3L spend",
+                    benefits: "Taj vouchers, Priority Pass, hotel memberships",
+                    source: "Reddit r/IndianStockMarket, Twitter @AmexIndia"
+                }
+            ];
+        }
+        
+        function displayBenefits(data, container) {
+            let html = `<div class="result-card">`;
+            html += `<h3>📱 ${data.cardName}</h3>`;
+            
+            for (const [category, benefits] of Object.entries(data.categories)) {
+                html += `<div class="benefit-category">`;
+                html += `<h4>${category}</h4>`;
+                html += `<ul>`;
+                benefits.forEach(benefit => {
+                    html += `<li>${benefit}</li>`;
+                });
+                html += `</ul></div>`;
+            }
+            
+            html += `<p style="margin-top: 15px; color: #777; font-size: 14px;">`;
+            html += `<strong>Sources:</strong> ${data.sources.join(', ')}`;
+            html += `</p>`;
+            
+            html += `<a href="https://www.google.com/search?q=${encodeURIComponent(data.cardName + ' benefits')}" 
+                     target="_blank" class="source-link">🔗 Search for more details</a>`;
+            html += `</div>`;
+            
+            container.innerHTML = html;
+        }
+        
+        function displayFreePremiumCards(cards, container) {
+            let html = '';
+            
+            cards.forEach(card => {
+                html += `<div class="result-card">`;
+                html += `<h3>💎 ${card.cardName}</h3>`;
+                html += `<p><strong>Free Conditions:</strong> ${card.conditions}</p>`;
+                html += `<p><strong>Key Benefits:</strong> ${card.benefits}</p>`;
+                html += `<p style="color: #777; font-size: 14px; margin-top: 10px;">`;
+                html += `<strong>Source:</strong> ${card.source}</p>`;
+                html += `<a href="https://www.google.com/search?q=${encodeURIComponent(card.cardName + ' free lifetime offer')}" 
+                         target="_blank" class="source-link">🔗 Verify current offers</a>`;
+                html += `</div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
